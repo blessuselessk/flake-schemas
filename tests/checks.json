@@ -11,7 +11,7 @@
             "children": {
               "hello": {
                 "derivation": {
-                  "name": "hello-2.12.1"
+                  "name": "hello-2.12.2"
                 },
                 "forSystems": [
                   "x86_64-linux"
