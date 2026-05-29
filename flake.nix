@@ -490,8 +490,6 @@
         bundlers = bundlersSchema;
       };
 
-      schemas = {
-        inherit (self.exportedSchemas) exportedSchemas schemas;
-      };
+      schemas = self.exportedSchemas;
     };
 }
