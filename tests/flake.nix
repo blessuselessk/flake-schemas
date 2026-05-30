@@ -1,7 +1,6 @@
 {
   inputs.flake-schemas.url = "path:..";
-  # FIXME: use regular Nix after flake-schemas have been merged.
-  inputs.nix.url = "github:DeterminateSystems/nix-src/flake-schemas-detsys";
+  inputs.nix.url = "https://flakehub.com/f/DeterminateSystems/nix-src/3";
   inputs.nixpkgs.follows = "nix/nixpkgs";
 
   outputs =
