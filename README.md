@@ -19,6 +19,7 @@ The schemas in this repo currently cover these output types:
 * [`darwinConfigurations`][darwin]
 * [`darwinModules`][darwin]
 * [`devShells`][develop]
+* `exportedSchemas` (for schemas that you intend to share with the flake ecosystem)
 * [`formatter`][formatter]
 * [`homeConfigurations`][home]
 * [`homeModules`][home]
@@ -29,7 +30,7 @@ The schemas in this repo currently cover these output types:
 * [`ociImages`][oci]
 * [`overlays`][overlays]
 * [`packages`][packages]
-* `schemas`
+* `schemas` (for use by Nix itself to understand your flake outputs)
 * [`templates`][templates]
 
 To see an example of a flake that uses a custom schema, run this command (with Determinate Nix):
@@ -56,7 +57,7 @@ If a given flake has no `schemas` output, [Determinate Nix][det-nix] uses the sc
 That means that any outputs that conform to the schemas [provided here](#provided-schemas) are covered (`devShells`, `packages`, `check`, etc.).
 
 If a given flake *does* have a `schemas` output, [Determinate Nix][det-nix] uses that to determine the structure of the flake's outputs.
-What that means is that if you want non-default schemas&mdash;as in, schemas that aren't built into Determinate Nix&mdash;you need to declare your own `schemas` output.
+What that means is that if you want non-default schemas&mdash;schemas that aren't built into Determinate Nix&mdash;you need to declare your own `schemas` output.
 Here's an example of a flake that extends the schemas in this repo:
 
 ```nix
@@ -66,7 +67,7 @@ Here's an example of a flake that extends the schemas in this repo:
   outputs =
     { self, ... }@inputs:
     {
-      schemas = inputs.flake-schemas.schemas // {
+      schemas = inputs.flake-schemas.exportedSchemas // {
         # other schemas here
       };
 
@@ -79,16 +80,16 @@ You can extend that with one of your own custom schemas, for example:
 
 ```nix
 {
-  schemas = inputs.flake-schemas.schemas // {
-    myOutputs = {
-      version = 1;
-      doc = "The `myOutputs` flake output.";
-      inventory = output: {
-        children = builtins.mapAttrs (system: value: {
-          forSystems = [ system ];
-          what = "my output";
-        }) output;
-      };
+  schemas = inputs.flake-schemas.exportedSchemas // self.exportedSchemas;
+
+  exportedSchemas.myOutputs = {
+    version = 1;
+    doc = "The `myOutputs` flake output.";
+    inventory = output: {
+      children = builtins.mapAttrs (system: value: {
+        forSystems = [ system ];
+        what = "my output";
+      }) output;
     };
   };
 }
@@ -106,7 +107,7 @@ Or you can extend with schemas from some other flake:
   outputs =
     { self, ... }@inputs:
     {
-      schemas = inputs.flake-schemas.schemas // inputs.other-flake.schemas;
+      schemas = inputs.flake-schemas.exportedSchemas // inputs.other-flake.exportedSchemas;
 
       # other outputs
     };
@@ -122,14 +123,14 @@ You can also define schemas without involving the schemas in this repo:
   outputs =
     { self, ... }@inputs:
     {
-      inherit (inputs.other-flake) schemas;
+      schemas = inputs.other-flake.exportedSchemas;
 
       # other outputs
     };
 }
 ```
 
-But be aware that when you do that, common schemas like `devShells`, `packages`, and others aren't available *unless* the flake from which you're inheriting schemas provides those.
+But be aware that when you do that, common schemas like `devShells`, `packages`, and others aren't available; those always need to be drawn from the default schemas in this repo.
 
 ## Development
 
